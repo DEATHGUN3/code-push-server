@@ -365,6 +365,7 @@ router.post('/:appName/deployments/:sourceDeploymentName/promote/:destDeployment
   var appName = _.trim(req.params.appName);
   var sourceDeploymentName = _.trim(req.params.sourceDeploymentName);
   var destDeploymentName = _.trim(req.params.destDeploymentName);
+  // var companyCode = _.trim(_.trimStart(_.get(req, 'query.companyCode', null)));
   var uid = req.users.id;
   var packageManager = new PackageManager();
   var deployments = new Deployments();
@@ -677,6 +678,24 @@ router.post('/', middleware.checkToken, (req, res, next) => {
       next(e);
     }
   });
+});
+
+router.get('/:appName/appInfo',middleware.checkToken,(req,res,next) => {
+  var appName = _.trim(req.params.appName);
+  var uid = req.users.id;
+  var appManager = new AppManager();
+  appManager.findAppInfo(appName)
+  .then((appInfo) => {
+    res.send({data:appInfo});
+  })
+  .catch((e) => {
+    if (e instanceof AppError.AppError) {
+      res.status(406).send(e.message);
+    } else {
+      next(e);
+    }
+  });
+
 });
 
 module.exports = router;

@@ -134,3 +134,36 @@ proto.getAppDetailInfo  = function (appInfo, currentUid) {
     });
   });
 };
+
+proto.findAppInfo = function (appName) {
+  return Promise.all([
+    models.Apps.findAppInfo(appName)
+  ])
+  .spread((appInfo) => {
+    var totalActive = 0;
+    appInfo.forEach(element => {
+      if (element) {
+        totalActive += element.dataValues.active;
+      }
+    });
+    appInfo.forEach(element => {
+      if (element) {
+        var activePercent = totalActive ? element.dataValues.active / totalActive * 100 : 0.0;
+        var updateRate;
+        if (activePercent === 100.0) {
+          updateRate = "100%";
+        }
+        else if (activePercent === 0.0) {
+          updateRate = "0%";
+        }
+        else {
+          updateRate = activePercent.toPrecision(2) + "%";
+        }
+      }
+      element.dataValues.updateRate = updateRate;
+    });
+    return appInfo;
+  });
+}
+
+
