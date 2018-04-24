@@ -2,8 +2,8 @@ var config = {};
 config.development = {
   // Config for database, only support mysql.
   db: {
-    username: process.env.RDS_USERNAME || "root",
-    password: process.env.RDS_PASSWORD || null,
+    username: process.env.RDS_USERNAME || "codepush",
+    password: process.env.RDS_PASSWORD || "jJ123456?",
     database: process.env.DATA_BASE || "codepush",
     host: process.env.RDS_HOST || "127.0.0.1",
     port: process.env.RDS_PORT || 3306,
@@ -38,11 +38,11 @@ config.development = {
   // Config for local storage when storageType value is "local".
   local: {
     // Binary files storage dir, Do not use tmpdir and it's public download dir.
-    storageDir: process.env.STORAGE_DIR || "/Users/tablee/workspaces/storage",
+    storageDir: process.env.STORAGE_DIR || "C:/codepush/storage",
     // Binary files download host address which Code Push Server listen to. the files storage in storageDir.
-    downloadUrl: process.env.LOCAL_DOWNLOAD_URL || "http://127.0.0.1:3000/download",
-    // public static download spacename.
-    public: process.env.PUBLIC || '/download'
+    downloadUrl: process.env.LOCAL_DOWNLOAD_URL || "http://192.168.1.96:3000/download",
+    // public static download spacename.process.env.PUBLIC || 
+    public: '/download'
   },
   jwt: {
     // Recommended: 63 random alpha-numeric characters
@@ -61,7 +61,7 @@ config.development = {
     // create patch updates's number. default value is 3
     diffNums: 3,
     // data dir for caclulate diff files. it's optimization.
-    dataDir: process.env.DATA_DIR || "/Users/tablee/workspaces/data",
+    dataDir: process.env.DATA_DIR || "C:/codepush/data",
     // storageType which is your binary package files store. options value is ("local" | "qiniu" | "s3")
     storageType: process.env.STORAGE_TYPE || "local",
     // options value is (true | false), when it's true, it will cache updateCheck results in redis.
@@ -103,11 +103,11 @@ config.development = {
 }
 
 config.development.log4js = {
-  appenders: {console: { type: 'console'}},
+  appenders: {console: { type: 'console'},info1: { type: 'file', filename: '.logs/info.log'}},
   categories : {
-    "default": { appenders: ['console'], level:'error'},
-    "startup": { appenders: ['console'], level:'info'},
-    "http": { appenders: ['console'], level:'info'}
+    "default": { appenders: ['console','info1'], level:'debug'},
+    "startup": { appenders: ['console','info1'], level:'info'},
+    "http": { appenders: ['console','info1'], level:'info'}
   }
 }
 
