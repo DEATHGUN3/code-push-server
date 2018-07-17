@@ -92,6 +92,10 @@ proto.findDeloymentByName = function (deploymentName, appId) {
   });
 };
 
+proto.selectDeploymentKeyByName = function (appName1, appName2) {
+  return models.Deployments.selectDeploymentKeyByName(appName1, appName2);
+};
+
 proto.findPackagesAndOtherInfos = function (packageId) {
   return models.Packages.findOne({
     where: {id: packageId}

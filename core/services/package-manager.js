@@ -292,7 +292,7 @@ proto.releasePackage = function (deploymentId, packageInfo, fileType, filePath, 
     security.qetag(filePath),
     common.createEmptyFolder(directoryPath)
     .then(() => {
-      if (fileType == "application/zip") {
+      if (fileType == "application/zip" || fileType == "application/octet-stream") {
         return common.unzipFile(filePath, directoryPath)
       } else {
         log.debug(`上传的文件格式不对`);

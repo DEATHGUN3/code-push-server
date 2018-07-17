@@ -318,11 +318,13 @@ router.post('/:appName/deployments/:deploymentName/release',
     });
   })
   .then((data) => {
-    res.send('{"msg": "succeed"}');
+    // res.send('{"msg": "succeed"}');
+    res.send({status:'OK'});
   })
   .catch((e) => {
     if (e instanceof AppError.AppError) {
-      res.status(406).send(e.message);
+      // res.status(406).send(e.message);
+      res.send({status:'ERROR', errorMessage: e.message});
     } else {
       next(e);
     }
@@ -365,7 +367,6 @@ router.post('/:appName/deployments/:sourceDeploymentName/promote/:destDeployment
   var appName = _.trim(req.params.appName);
   var sourceDeploymentName = _.trim(req.params.sourceDeploymentName);
   var destDeploymentName = _.trim(req.params.destDeploymentName);
-  // var companyCode = _.trim(_.trimStart(_.get(req, 'query.companyCode', null)));
   var uid = req.users.id;
   var packageManager = new PackageManager();
   var deployments = new Deployments();
@@ -411,11 +412,13 @@ router.post('/:appName/deployments/:sourceDeploymentName/promote/:destDeployment
     return null;
   })
   .then(() => {
-     res.send('ok');
+    //  res.send('ok');
+     res.send({status:'OK'});
   })
   .catch((e) => {
     if (e instanceof AppError.AppError) {
-      res.status(406).send(e.message);
+      // res.status(406).send(e.message);
+      res.send({status:'ERROR', errorMessage: e.message});
     } else {
       next(e);
     }
@@ -446,7 +449,7 @@ var rollbackCb = function (req, res, next) {
     return packageManager.rollbackPackage(dep.last_deployment_version_id, targetLabel, uid);
   })
   .then(() => {
-     res.send('ok');
+    res.send({status:'OK'});
   })
   .catch((e) => {
     if (e instanceof AppError.AppError) {
@@ -680,7 +683,55 @@ router.post('/', middleware.checkToken, (req, res, next) => {
   });
 });
 
-router.get('/:appName/appInfo',middleware.checkToken,(req,res,next) => {
+router.post('/:appName/add', middleware.checkToken, (req, res, next) => {
+  var appName = _.trim(req.params.appName);
+  var uid = req.users.id;
+  var appManager = new AppManager();
+  if (_.isEmpty(appName)) {
+    return res.status(406).send("Please input name!");
+  }
+  var appName1 = appName + "-ios";
+  var appName2 = appName + "-android";
+  appManager.findAppByName(uid, appName1)
+  .then((appInfo) => {
+    if (!_.isEmpty(appInfo)){
+      throw new AppError.AppError(appName1 + " Exist!");
+    }
+    if (!REGEX.test(appName1)) {
+      throw new AppError.AppError(`appName have to point -android or -ios suffix! eg. ${appName1}-android ${appName1}-ios`);
+    }
+    return appManager.addApp(uid, appName1, req.users.identical)
+    .then(() => {
+      return {name: appName1, collaborators: {[req.users.email]: {permission: "Owner"}}};
+    });
+  })
+  appManager.findAppByName(uid, appName2)
+  .then((appInfo) => {
+    if (!_.isEmpty(appInfo)){
+      throw new AppError.AppError(appName2 + " Exist!");
+    }
+    if (!REGEX.test(appName2)) {
+      throw new AppError.AppError(`appName have to point -android or -ios suffix! eg. ${appName2}-android ${appName2}-ios`);
+    }
+    return appManager.addApp(uid, appName2, req.users.identical)
+    .then(() => {
+      return Deployments.selectDeploymentKeyByName(appName1,appName2);
+    });
+  })
+  .then((data) => {
+    res.send({status:'OK',data: data});
+  })
+  .catch((e) => {
+    if (e instanceof AppError.AppError) {
+      // res.status(406).send(e.message);
+      res.send({status:'ERROR', errorMessage: e.message});
+    } else {
+      next(e);
+    }
+  });
+});
+
+router.get('/:appName/appMetricsInfo',middleware.checkToken,(req,res,next) => {
   var appName = _.trim(req.params.appName);
   var uid = req.users.id;
   var appManager = new AppManager();
@@ -690,7 +741,8 @@ router.get('/:appName/appInfo',middleware.checkToken,(req,res,next) => {
   })
   .catch((e) => {
     if (e instanceof AppError.AppError) {
-      res.status(406).send(e.message);
+      // res.status(406).send(e.message);
+      res.send({status:'ERROR', errorMessage: e.message});
     } else {
       next(e);
     }

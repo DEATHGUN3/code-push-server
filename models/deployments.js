@@ -41,5 +41,10 @@ module.exports = function(sequelize, DataTypes) {
     });
   };
 
+  Deployments.selectDeploymentKeyByName = function (appName1, appName2) {
+    var sql = "SELECT a.name appName,d.name,d.deployment_key FROM `apps` a,deployments d where a.name in (:appName1,:appName2) and a.id = d.appid";
+    return sequelize.query(sql, { replacements: { appName1: appName1,appName2: appName2 },model: Deployments});
+  };
+
   return Deployments;
 };
